@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Project507 - Time Rooms (Prototype)</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, "Noto Sans KR", Arial, sans-serif; }
+    body { margin:0; background:#0b0d12; color:#e9eef8; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 18px 14px 40px; }
+    .card { background:#121826; border:1px solid #22304a; border-radius: 16px; padding: 14px; }
+    .row { display:flex; gap:12px; flex-wrap: wrap; }
+    .col { flex:1 1 360px; min-width: 320px; }
+    h1 { font-size: 18px; margin: 6px 0 10px; letter-spacing: .2px; }
+    h2 { font-size: 14px; margin: 14px 0 8px; color:#b9c6dd; }
+    p { margin: 8px 0; line-height: 1.5; }
+    .muted { color:#9fb0ca; font-size: 13px; }
+    .btnbar { display:flex; gap:10px; flex-wrap: wrap; margin-top: 12px; }
+    button {
+      background:#1c2840; color:#e9eef8; border:1px solid #2b3c61;
+      padding: 10px 12px; border-radius: 12px; cursor:pointer; font-weight: 600;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.primary { background:#2a3f6b; border-color:#3f5fa4; }
+    button.danger { background:#3a2230; border-color:#6b3553; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .pill { display:inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; border:1px solid #2b3c61; color:#b9c6dd; }
+    .hr { height:1px; background:#22304a; margin: 12px 0; }
+    .grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .tile {
+      background:#0f1524; border:1px dashed #2b3c61; border-radius: 14px;
+      padding: 12px; min-height: 76px;
+    }
+    .tile strong { display:block; margin-bottom: 6px; }
+    .tags { display:flex; gap:8px; flex-wrap: wrap; margin-top: 8px; }
+    .tag { background:#0f1524; border:1px solid #2b3c61; border-radius: 999px; padding: 6px 10px; font-size: 12px; cursor:pointer; user-select:none; }
+    .tag.on { background:#1b2a4a; border-color:#4a6fb8; }
+    input[type="text"] {
+      width: 100%; box-sizing: border-box; padding: 10px 12px;
+      border-radius: 12px; border: 1px solid #2b3c61; background:#0f1524; color:#e9eef8;
+      outline: none;
+    }
+    .small { font-size: 12px; color:#9fb0ca; }
+    .ok { color:#6ee7b7; }
+    .warn { color:#fbbf24; }
+    .bad { color:#fb7185; }
+    .footer { margin-top: 16px; font-size: 12px; color:#9fb0ca; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <h1 id="stageTitle">Project507 Prototype</h1>
+        <div class="tags">
+          <span class="pill" id="stageMeta">Stage</span>
+          <span class="pill" id="progressMeta">Progress</span>
+        </div>
+        <div class="hr"></div>
+        <p id="narration"></p>
+        <p class="muted" id="hintLine"></p>
+
+        <div class="btnbar">
+          <button id="btnHint">힌트 보기</button>
+          <button id="btnReset" class="danger">초기화</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>퍼즐 진행</h2>
+        <p class="small" id="puzzleIntro"></p>
+
+        <div id="puzzleArea"></div>
+
+        <div class="btnbar">
+          <button id="btnPrev">이전</button>
+          <button id="btnNext" class="primary">다음</button>
+        </div>
+
+        <div class="footer">
+          저장: 자동(localStorage). 모바일에서 크롬으로 열면 링크 공유/홈화면 추가도 가능.
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h2>스토리 데이터(커스터마이즈 포인트)</h2>
+        <p class="muted">
+          아래 스테이지 텍스트/단서/코드만 바꾸면, “대학 선택”, “직무 선택” 같은
+          아내의 실제 스토리를 자연스럽게 녹여 넣을 수 있어.
+        </p>
+        <div class="hr"></div>
+        <p class="small">
+          ✅ 지금은 데모 문구야. 나중에 너희 에피소드로 교체하면 끝.<br/>
+          ✅ 공포 요소 없음 / 1인칭 유지 / “과거를 바꾸면 미래가 달라짐” 루프 구조.
+        </p>
+        <div class="hr"></div>
+        <p class="muted" id="debug"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * Project507: Time Rooms (Prototype)
+ * - Single HTML file
+ * - Stages: Past/Future loop
+ * - Each stage: 3 micro puzzles
+ *   1) Collect 3 clues (tap tags)
+ *   2) Order 3 lines (tap in correct order)
+ *   3) Code input (short)
+ * - Final choice: change past or not
+ */
+
+const STORAGE_KEY = "p507_time_rooms_v1";
+
+const story = {
+  title: "시간의 방들",
+  stages: [
+    {
+      id: "S1_PAST_UNI",
+      meta: "과거: 대학 선택의 아침",
+      title: "나는… 이미 지나온 아침에서 눈을 떴다",
+      narration: [
+        "눈을 떴을 때, 나는 이 장면을 알고 있다는 걸 알았다.",
+        "아무도 설명해주지 않는데도, 오늘이 ‘선택의 날’이라는 걸 나는 알고 있었다.",
+        "나는 방 안의 흔적들을 더듬으며, 그때의 나를 다시 만나려 한다."
+      ],
+      hints: [
+        "힌트: 단서들은 ‘정답’이 아니라 ‘기억’이야. 먼저 전부 눌러봐.",
+        "힌트: 문장 순서는 ‘감정의 흐름’대로.",
+        "힌트: 코드는 너무 어렵게 만들 필요 없어. 너희만 아는 4자리로."
+      ],
+      collect: {
+        prompt: "방 안에서 단서 3개를 찾아 눌러봐.",
+        items: [
+          { key:"brochure", text:"전공 안내서", reveal:"책상 한쪽에, 접힌 안내서가 있었다." },
+          { key:"map", text:"캠퍼스 지도", reveal:"지도는 낯설지만… 이상하게 익숙했다." },
+          { key:"note", text:"짧은 메모", reveal:"'괜찮아. 지금의 너도 충분해' 라는 글씨." }
+        ]
+      },
+      order: {
+        prompt: "문장 3개를 ‘자연스럽게 이어지는 순서’대로 눌러봐.",
+        lines: [
+          "나는 완벽한 선택을 해야 한다고 믿었다.",
+          "그래서 오늘을 더 많이 보고, 더 천천히 숨 쉬기로 했다.",
+          "그리고… 그 선택이 나를 어떤 사람에게 데려갈지 아직 몰랐다."
+        ],
+        correct: [0,1,2]
+      },
+      code: {
+        prompt: "마지막 문을 여는 코드(4자리)를 입력해.",
+        // 데모 코드: 나중에 너희만 아는 숫자로 바꿔
+        answer: "2013",
+        hint: "예: 둘에게 의미있는 연도 4자리"
+      },
+      onClear: { nextStage: "S2_FUTURE_1" }
+    },
+
+    {
+      id: "S2_FUTURE_1",
+      meta: "미래: 바뀐 결과(겉보기엔 더 매끄러운 삶)",
+      title: "미래는 달라져 있었다",
+      narration: [
+        "분명히… 미래는 달라져 있었다.",
+        "나는 더 잘 살고 있었다. 더 빠르고, 더 효율적이고, 더 ‘정답 같은’ 삶.",
+        "그런데 이상하게, 어떤 빈자리가 아주 조용히 남아 있었다."
+      ],
+      hints: [
+        "힌트: 이 미래의 단서는 ‘무엇이 사라졌는지’를 보여줘.",
+        "힌트: 순서 퍼즐은 ‘처음-중간-끝’으로 단순하게.",
+        "힌트: 코드는 단서 문구의 첫 글자를 숫자로 치환해도 돼(나중에 교체)."
+      ],
+      collect: {
+        prompt: "미래의 흔적 3개를 찾아 눌러봐.",
+        items: [
+          { key:"calendar", text:"빽빽한 일정표", reveal:"나는 칸을 꽉 채워도, 마음은 비었다." },
+          { key:"cup1", text:"컵 하나", reveal:"식탁 위엔 컵이 하나뿐이었다." },
+          { key:"award", text:"성과 보고서", reveal:"칭찬은 많았지만… 같이 웃을 사람은 없었다." }
+        ]
+      },
+      order: {
+        prompt: "문장 3개를 시간 순으로 눌러봐.",
+        lines: [
+          "나는 더 나은 선택을 했다고 믿었다.",
+          "하지만 더 나은 미래가 더 따뜻한 건 아니었다.",
+          "그래서 나는 ‘다음 문’을 찾기 시작했다."
+        ],
+        correct: [0,1,2]
+      },
+      code: {
+        prompt: "다음 ‘과거로 가는 문’의 코드를 입력해.",
+        answer: "0301",
+        hint: "예: 의미있는 날짜(월일) 4자리"
+      },
+      onClear: { nextStage: "S3_PAST_JOB" }
+    },
+
+    {
+      id: "S3_PAST_JOB",
+      meta: "과거: 직무 선택의 갈림길",
+      title: "나는 또 다른 과거에서 눈을 떴다",
+      narration: [
+        "다시 눈을 떴을 때, 나는 더 젊었고 더 불안했다.",
+        "선택지는 여러 개였고, 그때의 나는 ‘현실적인 답’을 찾느라 바빴다.",
+        "나는 이 과거를 고치면, 이번엔 더 괜찮은 미래가 올 거라 믿었다."
+      ],
+      hints: [
+        "힌트: 단서를 전부 모으면, 이 방의 ‘키워드’가 보여.",
+        "힌트: 순서는 ‘두려움 → 용기 → 결과’ 흐름으로.",
+        "힌트: 코드는 정답보다 ‘나만 아는 약속’이 더 좋다."
+      ],
+      collect: {
+        prompt: "갈림길의 흔적 3개를 찾아 눌러봐.",
+        items: [
+          { key:"offerA", text:"안정적인 제안", reveal:"안정은 달콤했지만, 숨이 조금 막혔다." },
+          { key:"offerB", text:"도전적인 제안", reveal:"두려웠지만, 어딘가 살아있는 느낌이 있었다." },
+          { key:"msg", text:"짧은 문자", reveal:"'밥 먹었어?'… 그 한 마디가 이상하게 따뜻했다." }
+        ]
+      },
+      order: {
+        prompt: "문장 3개를 ‘내 마음의 순서’대로 눌러봐.",
+        lines: [
+          "나는 틀리지 않으려고 애썼다.",
+          "그래서 내가 정말 원하는 게 뭔지 자꾸 늦게 알았다.",
+          "하지만 어떤 날의 작은 따뜻함이 나를 바꿨다."
+        ],
+        correct: [0,1,2]
+      },
+      code: {
+        prompt: "마지막 문(직무 선택)을 여는 코드(4자리).",
+        answer: "1111",
+        hint: "예: 별명 숫자/기념일/둘만 아는 코드"
+      },
+      onClear: { nextStage: "S4_FUTURE_LAST" }
+    },
+
+    {
+      id: "S4_FUTURE_LAST",
+      meta: "미래: 모든 걸 고친 뒤 도착한 곳",
+      title: "틀린 적은 없었는데… 이 삶은 낯설었다",
+      narration: [
+        "나는 실패하지 않았다. 적어도 겉보기에는.",
+        "하지만 이 집은, 이 저녁은, 이 침묵은… 내가 살고 싶던 방식이 아니었다.",
+        "그때 문득 떠오른다. 내가 정말로 바꾸고 싶었던 게 뭔지."
+      ],
+      hints: [
+        "힌트: 단서는 ‘없어진 것’이 아니라 ‘남아야 했던 것’이야.",
+        "힌트: 순서는 ‘깨달음 → 후회 → 결심’.",
+        "힌트: 코드를 맞추는 순간, 루프가 시작돼."
+      ],
+      collect: {
+        prompt: "이 미래의 결핍을 보여주는 단서 3개를 찾아 눌러봐.",
+        items: [
+          { key:"chair", text:"비어 있는 의자", reveal:"의자가 하나 더 있어야 할 것 같았다." },
+          { key:"photo", text:"없는 사진", reveal:"액자만 남아 있고, 사진은 없었다." },
+          { key:"silence", text:"너무 정돈된 침묵", reveal:"정돈은 완벽했지만, 웃음은 없었다." }
+        ]
+      },
+      order: {
+        prompt: "문장 3개를 눌러 ‘마지막 결심’으로 이어봐.",
+        lines: [
+          "나는 더 좋은 미래를 만들고 싶었다.",
+          "하지만 더 좋은 선택이 더 좋은 삶은 아니었다.",
+          "그래서… 나는 처음의 아침으로 돌아가기로 했다."
+        ],
+        correct: [0,1,2]
+      },
+      code: {
+        prompt: "‘처음의 아침’으로 돌아가는 문 코드(4자리).",
+        answer: "0000",
+        hint: "데모. 나중에 의미있는 코드로 교체"
+      },
+      onClear: { nextStage: "S1_RETURN_CHOICE" }
+    },
+
+    {
+      id: "S1_RETURN_CHOICE",
+      meta: "처음의 아침: 최종 선택",
+      title: "이번엔… 고치지 않을 수도 있다",
+      narration: [
+        "나는 다시 처음의 아침에 서 있다.",
+        "이번엔 안다. 문을 열면 미래는 또 바뀐다.",
+        "그리고… 내가 정말 원하는 건 ‘더 나은 선택’이 아니라 ‘이 하루’였다는 걸."
+      ],
+      hints: [
+        "힌트: 여기서는 퍼즐이 아니라 선택이 전부야."
+      ],
+      choice: {
+        prompt: "문을 열어 과거를 바꿀까?",
+        options: [
+          { key:"change", label:"문을 연다 (또 다른 미래로)", action:"LOOP" },
+          { key:"keep", label:"문을 열지 않는다 (이 하루를 산다)", action:"ENDING" }
+        ]
+      }
+    }
+  ]
+};
+
+// ---- State ----
+const defaultState = {
+  stageId: "S1_PAST_UNI",
+  puzzleIndex: 0,       // 0=collect, 1=order, 2=code, 3=stageClear/choice
+  collected: {},        // per stage: item keys
+  orderClicks: [],      // chosen indices
+  clearedStages: {},    // stageId => true
+};
+
+let state = loadState();
+
+// ---- Helpers ----
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(defaultState);
+    const parsed = JSON.parse(raw);
+    return { ...structuredClone(defaultState), ...parsed };
+  } catch {
+    return structuredClone(defaultState);
+  }
+}
+function resetAll() {
+  state = structuredClone(defaultState);
+  saveState();
+  render();
+}
+function getStage(id) {
+  return story.stages.find(s => s.id === id);
+}
+function stageProgressText() {
+  const idx = state.puzzleIndex;
+  const total = 3;
+  if (idx <= 2) return `Puzzle ${idx+1}/${total}`;
+  return "완료/선택";
+}
+
+function vibrate(ms=20){
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+// ---- Rendering ----
+const $ = (id) => document.getElementById(id);
+
+function render() {
+  const stage = getStage(state.stageId);
+  if (!stage) { resetAll(); return; }
+
+  $("stageTitle").textContent = `${story.title} · ${stage.title}`;
+  $("stageMeta").textContent = stage.meta;
+  $("progressMeta").textContent = stageProgressText();
+
+  // narration: show progressively by cleared puzzles
+  const linesToShow = Math.min(stage.narration.length, state.puzzleIndex + 1);
+  $("narration").textContent = stage.narration.slice(0, linesToShow).join(" ");
+
+  $("hintLine").textContent = "";
+  $("debug").textContent = `StageId=${stage.id} | puzzleIndex=${state.puzzleIndex}`;
+
+  $("btnPrev").disabled = (state.puzzleIndex === 0);
+  $("btnNext").disabled = false;
+
+  $("btnHint").onclick = () => {
+    const h = stage.hints?.[Math.min(state.puzzleIndex, (stage.hints?.length||1)-1)];
+    $("hintLine").textContent = h ? h : "힌트가 아직 없어요.";
+    vibrate(15);
+  };
+  $("btnReset").onclick = resetAll;
+
+  // Render puzzle area
+  renderPuzzle(stage);
+}
+
+function renderPuzzle(stage) {
+  const area = $("puzzleArea");
+  area.innerHTML = "";
+
+  const intro = $("puzzleIntro");
+
+  // Choice stage
+  if (stage.choice) {
+    intro.textContent = stage.choice.prompt;
+    const wrap = document.createElement("div");
+    wrap.className = "btnbar";
+    stage.choice.options.forEach(opt => {
+      const b = document.createElement("button");
+      b.className = opt.action === "ENDING" ? "primary" : "";
+      b.textContent = opt.label;
+      b.onclick = () => {
+        vibrate(25);
+        if (opt.action === "LOOP") {
+          // loop back to start stage 1
+          state.stageId = "S1_PAST_UNI";
+          state.puzzleIndex = 0;
+          state.orderClicks = [];
+          // keep clearedStages as memory of journey (optional)
+          saveState();
+          render();
+        } else {
+          showEnding();
+        }
+      };
+      wrap.appendChild(b);
+    });
+    area.appendChild(wrap);
+    $("btnPrev").disabled = true;
+    $("btnNext").disabled = true;
+    return;
+  }
+
+  // Regular 3 puzzles
+  if (state.puzzleIndex === 0) {
+    intro.textContent = stage.collect.prompt;
+    area.appendChild(renderCollect(stage));
+  } else if (state.puzzleIndex === 1) {
+    intro.textContent = stage.order.prompt;
+    area.appendChild(renderOrder(stage));
+  } else if (state.puzzleIndex === 2) {
+    intro.textContent = stage.code.prompt;
+    area.appendChild(renderCode(stage));
+  } else {
+    intro.textContent = "이 스테이지의 문이 열렸다.";
+    area.appendChild(renderStageClear(stage));
+  }
+
+  // Next/Prev handlers
+  $("btnPrev").onclick = () => {
+    state.puzzleIndex = Math.max(0, state.puzzleIndex - 1);
+    state.orderClicks = [];
+    saveState();
+    render();
+  };
+
+  $("btnNext").onclick = () => {
+    // validate current puzzle before moving
+    const ok = validateCurrent(stage);
+    if (!ok) { vibrate(40); return; }
+    state.puzzleIndex = Math.min(3, state.puzzleIndex + 1);
+    state.orderClicks = [];
+    saveState();
+    render();
+  };
+}
+
+function validateCurrent(stage) {
+  if (state.puzzleIndex === 0) {
+    const got = state.collected[stage.id] || [];
+    return got.length >= 3;
+  }
+  if (state.puzzleIndex === 1) {
+    return isOrderCorrect(stage);
+  }
+  if (state.puzzleIndex === 2) {
+    const input = document.querySelector("#codeInput");
+    if (!input) return false;
+    return input.value.trim() === stage.code.answer;
+  }
+  return true;
+}
+
+function renderCollect(stage) {
+  const div = document.createElement("div");
+  div.className = "grid";
+
+  const got = new Set(state.collected[stage.id] || []);
+
+  stage.collect.items.forEach(item => {
+    const t = document.createElement("div");
+    t.className = "tile";
+    const title = document.createElement("strong");
+    title.textContent = item.text;
+    const desc = document.createElement("p");
+    desc.className = "small";
+    desc.textContent = got.has(item.key) ? item.reveal : "터치해서 단서를 확인해.";
+    const tag = document.createElement("span");
+    tag.className = "tag " + (got.has(item.key) ? "on" : "");
+    tag.textContent = got.has(item.key) ? "확인됨" : "확인";
+    tag.onclick = () => {
+      vibrate(15);
+      const arr = new Set(state.collected[stage.id] || []);
+      if (arr.has(item.key)) arr.delete(item.key);
+      else arr.add(item.key);
+      state.collected[stage.id] = Array.from(arr);
+      saveState();
+      render();
+    };
+    t.appendChild(title);
+    t.appendChild(desc);
+    t.appendChild(tag);
+    div.appendChild(t);
+  });
+
+  const info = document.createElement("p");
+  info.className = "small " + (((state.collected[stage.id]||[]).length>=3) ? "ok" : "warn");
+  info.textContent = `단서 ${Math.min((state.collected[stage.id]||[]).length,3)}/3 확보`;
+  const wrap = document.createElement("div");
+  wrap.appendChild(div);
+  wrap.appendChild(info);
+  return wrap;
+}
+
+function renderOrder(stage) {
+  const wrap = document.createElement("div");
+
+  const list = document.createElement("div");
+  list.className = "tile";
+
+  const chosen = state.orderClicks;
+
+  const p = document.createElement("p");
+  p.className = "small";
+  p.textContent = "아래 문장들을 원하는 순서로 눌러서 3개를 모두 선택해.";
+  list.appendChild(p);
+
+  const btns = document.createElement("div");
+  btns.className = "btnbar";
+
+  stage.order.lines.forEach((line, idx) => {
+    const b = document.createElement("button");
+    b.textContent = (chosen.includes(idx) ? `✓ ${line}` : line);
+    b.onclick = () => {
+      vibrate(15);
+      let next = [...chosen];
+      if (next.includes(idx)) next = next.filter(x => x !== idx);
+      else if (next.length < stage.order.lines.length) next.push(idx);
+      state.orderClicks = next;
+      saveState();
+      render();
+    };
+    btns.appendChild(b);
+  });
+
+  const status = document.createElement("p");
+  status.className = "small";
+  status.textContent = `선택: ${chosen.length}/${stage.order.lines.length}  ·  ` +
+    (chosen.length === stage.order.lines.length
+      ? (isOrderCorrect(stage) ? "정답입니다." : "순서가 달라요. 다시 해볼래?")
+      : "문장 3개를 모두 선택해.");
+
+  wrap.appendChild(list);
+  wrap.appendChild(btns);
+  wrap.appendChild(status);
+
+  const reset = document.createElement("button");
+  reset.textContent = "선택 초기화";
+  reset.onclick = () => { state.orderClicks = []; saveState(); render(); };
+  wrap.appendChild(document.createElement("div")).className = "hr";
+  wrap.appendChild(reset);
+
+  return wrap;
+}
+
+function isOrderCorrect(stage) {
+  const chosen = state.orderClicks;
+  if (chosen.length !== stage.order.correct.length) return false;
+  return chosen.every((v,i) => v === stage.order.correct[i]);
+}
+
+function renderCode(stage) {
+  const wrap = document.createElement("div");
+  const input = document.createElement("input");
+  input.id = "codeInput";
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.placeholder = "예: 4자리 숫자";
+  input.maxLength = 8;
+
+  const tip = document.createElement("p");
+  tip.className = "small muted";
+  tip.textContent = `힌트: ${stage.code.hint}`;
+
+  const chk = document.createElement("p");
+  chk.className = "small";
+  chk.id = "codeStatus";
+  chk.textContent = "코드를 입력한 뒤 ‘다음’을 눌러봐.";
+
+  input.addEventListener("input", () => {
+    const v = input.value.trim();
+    if (!v) { chk.textContent = "코드를 입력해."; chk.className = "small"; return; }
+    if (v === stage.code.answer) { chk.textContent = "코드가 맞아. 문이 열릴 것 같아."; chk.className = "small ok"; }
+    else { chk.textContent = "아직 아니야. 힌트를 확인해봐."; chk.className = "small warn"; }
+  });
+
+  wrap.appendChild(input);
+  wrap.appendChild(tip);
+  wrap.appendChild(chk);
+  return wrap;
+}
+
+function renderStageClear(stage) {
+  const wrap = document.createElement("div");
+  const p = document.createElement("p");
+  p.textContent = "문을 열면, 다음 시점으로 이동한다.";
+  p.className = "muted";
+
+  const go = document.createElement("button");
+  go.className = "primary";
+  go.textContent = "문을 연다";
+  go.onclick = () => {
+    vibrate(25);
+    state.clearedStages[stage.id] = true;
+    state.stageId = stage.onClear.nextStage;
+    state.puzzleIndex = 0;
+    state.orderClicks = [];
+    saveState();
+    render();
+  };
+
+  wrap.appendChild(p);
+  wrap.appendChild(go);
+  $("btnNext").disabled = true; // use explicit button
+  return wrap;
+}
+
+function showEnding() {
+  const area = $("puzzleArea");
+  $("puzzleIntro").textContent = "엔딩";
+  area.innerHTML = "";
+
+  const card = document.createElement("div");
+  card.className = "tile";
+  const t = document.createElement("strong");
+  t.textContent = "나는 과거를 고치지 않기로 했다.";
+  const p1 = document.createElement("p");
+  p1.className = "small";
+  p1.textContent =
+    "완벽한 선택은 없었다. 하지만 이 선택 덕분에, 내가 함께 살고 싶은 하루가 있었다.";
+  const p2 = document.createElement("p");
+  p2.className = "small";
+  p2.textContent =
+    "그리고 그 하루는… 지금도 계속되고 있다.";
+
+  const again = document.createElement("button");
+  again.textContent = "처음부터 다시";
+  again.onclick = resetAll;
+
+  card.appendChild(t);
+  card.appendChild(p1);
+  card.appendChild(p2);
+  area.appendChild(card);
+  area.appendChild(document.createElement("div")).className = "hr";
+  area.appendChild(again);
+
+  $("btnPrev").disabled = true;
+  $("btnNext").disabled = true;
+  vibrate(30);
+}
+
+render();
+</script>
+</body>
+</html>
