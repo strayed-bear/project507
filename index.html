@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0", maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Project 507</title>
 <style>
     body {
@@ -17,7 +17,7 @@
     #room {
         position: relative;
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -38,6 +38,11 @@
     .object:hover {
         background: rgba(255, 255, 255, 0.2);
         transform: scale(1.05);
+    }
+    
+    .object.clicked {
+    opacity: 0.6;
+    pointer-events: none;   /* 다시 클릭 못하게 */
     }
 
     #photo  { top: 42%; left: 18%; }
@@ -158,6 +163,7 @@
     document.getElementById("photo").onclick = () => {
         if (memory.photo) return;
         memory.photo = true;
+        document.getElementById("photo").classList.add("clicked");
         message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
         updateInventory();
     };
@@ -165,6 +171,7 @@
     document.getElementById("diary").onclick = () => {
         if (memory.diary) return;
         memory.diary = true;
+        document.getElementById("photo").classList.add("clicked");
         message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
         updateInventory();
     };
@@ -172,6 +179,7 @@
     document.getElementById("album").onclick = () => {
         if (memory.album) return;
         memory.album = true;
+        document.getElementById("photo").classList.add("clicked");
         message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
         updateInventory();
     };
@@ -195,7 +203,6 @@
         }, 2200);
     };
 
-    // 초기화
     updateInventory();
 </script>
 </body>
