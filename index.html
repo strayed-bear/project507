@@ -109,6 +109,9 @@ body {
 </div>
 
 <script>
+
+let waitingForMirrorMessage = false;
+    
 const photo = document.getElementById("photo");
 const diary = document.getElementById("diary");
 const album = document.getElementById("album");
@@ -168,8 +171,7 @@ function updateInventory() {
     `;
 
     if (memory.photo && memory.diary && memory.album) {
-        mirror.classList.add("mirror-active");
-        message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
+    waitingForMirrorMessage = true;
     }
 }
 
@@ -230,6 +232,18 @@ window.addEventListener("orientationchange", adjustObjectPositions);
 window.addEventListener("load", adjustObjectPositions);
 
 updateInventory();
+document.addEventListener("click", (e) => {
+
+    if (!waitingForMirrorMessage) return;
+
+    // 오브젝트 클릭은 제외
+    if (e.target.classList.contains("object") || e.target.id === "mirror") return;
+
+    waitingForMirrorMessage = false;
+
+    mirror.classList.add("mirror-active");
+    message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
+});
 </script>
 </body>
 </html>
