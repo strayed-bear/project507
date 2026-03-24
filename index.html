@@ -1,96 +1,93 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Project 507</title>
-    
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Project 507</title>
 
-        #room {
-            position: relative;
-            width: 100vw;
-            height: 100dvh;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-image: url('./image/living-room-bg.jpg');
-        }
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
 
-        .object {
-            position: absolute;
-            cursor: pointer;
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: 10px;
-            color: white;
-            font-size: 15px;
-            transition: all 0.2s;
-        }
+#room {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    background-image: url('./image/living-room-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
-        .object:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.08);
-        }
+/* 오브젝트 기본 스타일 */
+.object {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.2s;
+}
 
-        .object.clicked {
-            opacity: 0.6;
-            pointer-events: none;
-        }
+.object:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translate(-50%, -50%) scale(1.08);
+}
 
-        #photo  { top: 48%; left: 46.5%; }
-        #diary  { top: 71%; left: 46%; }
-        #album  { top: 38%; left: 19%; }
+.object.clicked {
+    opacity: 0.6;
+    pointer-events: none;
+}
 
-        #mirror {
-            right: 8.5%;
-            top: 31%;
-            width: 125px;
-            height: 305px;
-            background: rgba(255,255,255,0.15);
-            border: 6px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
-        }
+/* 거울 */
+#mirror {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: rgba(255,255,255,0.15);
+    border: 6px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
 
-        #message {
-            position: absolute;
-            bottom: 8%;
-            left: 5%;
-            right: 5%;
-            background: rgba(0,0,0,0.75);
-            padding: 18px 25px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            min-height: 70px;
-        }
+.mirror-active {
+    box-shadow: 0 0 30px cyan;
+    border-color: cyan;
+}
 
-        #inventory {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.6);
-            padding: 12px 18px;
-            border-radius: 10px;
-            text-align: left;
-            font-size: 14px;
-        }
+/* 메시지 */
+#message {
+    position: absolute;
+    bottom: calc(8% + env(safe-area-inset-bottom));
+    left: 5%;
+    right: 5%;
+    background: rgba(0,0,0,0.75);
+    padding: 18px 25px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
 
-        .mirror-active {
-            box-shadow: 0 0 30px cyan;
-            border-color: cyan;
-        }
-    </style>
+/* 인벤토리 */
+#inventory {
+    position: absolute;
+    top: calc(15px + env(safe-area-inset-top));
+    left: calc(15px + env(safe-area-inset-left));
+    background: rgba(0,0,0,0.6);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+</style>
 </head>
+
 <body>
 
 <div id="room">
@@ -98,10 +95,13 @@
         수집한 기억:<br>
         <div id="items"></div>
     </div>
+
     <div id="photo" class="object">사진</div>
     <div id="diary" class="object">다이어리</div>
     <div id="album" class="object">앨범</div>
+
     <div id="mirror"></div>
+
     <div id="message">
         눈을 뜨니 익숙한 거실이다...<br>
         주변을 천천히 둘러보자.
@@ -109,118 +109,119 @@
 </div>
 
 <script>
-    let memory = {
-        photo: false,
-        diary: false,
-        album: false
-    };
+let memory = {
+    photo: false,
+    diary: false,
+    album: false
+};
 
-    const message = document.getElementById("message");
-    const mirror = document.getElementById("mirror");
-    const items = document.getElementById("items");
+const message = document.getElementById("message");
+const mirror = document.getElementById("mirror");
+const items = document.getElementById("items");
+const room = document.getElementById("room");
 
-    function updateInventory() {
-        items.innerHTML = `
-            사진: ${memory.photo ? "✔" : "❌"}<br>
-            다이어리: ${memory.diary ? "✔" : "❌"}<br>
-            앨범: ${memory.album ? "✔" : "❌"}
-        `;
+/* =========================
+   배경 기준 좌표 시스템
+   ========================= */
+const layout = {
+    photo: { x: 0.465, y: 0.48 },
+    diary: { x: 0.46, y: 0.71 },
+    album: { x: 0.19, y: 0.38 },
+    mirror: { x: 0.915, y: 0.31, w: 0.07, h: 0.28 }
+};
 
-        if (memory.photo && memory.diary && memory.album) {
-            mirror.classList.add("mirror-active");
-            message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
-        }
+function placeObject(el, x, y) {
+    const w = room.clientWidth;
+    const h = room.clientHeight;
+
+    el.style.left = (w * x) + "px";
+    el.style.top = (h * y) + "px";
+}
+
+function adjustObjectPositions() {
+
+    placeObject(photo, layout.photo.x, layout.photo.y);
+    placeObject(diary, layout.diary.x, layout.diary.y);
+    placeObject(album, layout.album.x, layout.album.y);
+
+    const w = room.clientWidth;
+    const h = room.clientHeight;
+
+    mirror.style.left = (w * layout.mirror.x) + "px";
+    mirror.style.top = (h * layout.mirror.y) + "px";
+    mirror.style.width = (w * layout.mirror.w) + "px";
+    mirror.style.height = (h * layout.mirror.h) + "px";
+}
+
+/* =========================
+   인벤토리 업데이트
+   ========================= */
+function updateInventory() {
+    items.innerHTML = `
+        사진: ${memory.photo ? "✔" : "❌"}<br>
+        다이어리: ${memory.diary ? "✔" : "❌"}<br>
+        앨범: ${memory.album ? "✔" : "❌"}
+    `;
+
+    if (memory.photo && memory.diary && memory.album) {
+        mirror.classList.add("mirror-active");
+        message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
     }
+}
 
-    // 클릭 이벤트
-    document.getElementById("photo").onclick = () => {
-        if (memory.photo) return;
-        memory.photo = true;
-        document.getElementById("photo").classList.add("clicked");
-        message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
-        updateInventory();
-    };
-
-    document.getElementById("diary").onclick = () => {
-        if (memory.diary) return;
-        memory.diary = true;
-        document.getElementById("diary").classList.add("clicked");
-        message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
-        updateInventory();
-    };
-
-    document.getElementById("album").onclick = () => {
-        if (memory.album) return;
-        memory.album = true;
-        document.getElementById("album").classList.add("clicked");
-        message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
-        updateInventory();
-    };
-
-    mirror.onclick = () => {
-        if (!(memory.photo && memory.diary && memory.album)) {
-            message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
-            return;
-        }
-        message.innerHTML = "거울 속으로 손을 뻗는다...";
-       
-        setTimeout(() => {
-            document.getElementById("room").style.transition = "opacity 1.8s";
-            document.getElementById("room").style.opacity = "0";
-        }, 800);
-
-        setTimeout(() => {
-            message.innerHTML = "과거로... 돌아가고 있다.";
-        }, 2200);
-    };
-
-    // ==================== 기기 감지 + 자동 위치 조정 ====================
-    function adjustObjectPositions() {
-        const width = window.innerWidth;
-        const isPortrait = window.innerHeight > width;
-        const isMobile = width < 500 && isPortrait;
-
-        let photoPos = { top: "48%", left: "46.5%" };
-        let diaryPos = { top: "71%", left: "46%" };
-        let albumPos = { top: "38%", left: "19%" };
-        let mirrorPos = { right: "8.5%", top: "31%", width: "125px", height: "305px" };
-
-        if (isMobile) {
-            photoPos = { top: "44%", left: "46%" };
-            diaryPos = { top: "69%", left: "45.5%" };
-            albumPos = { top: "37%", left: "18%" };
-            mirrorPos = { right: "7%", top: "29%", width: "108px", height: "265px" };
-
-            // 아이폰은 화면이 조금 더 넓게 느껴짐
-            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                photoPos.left = "47.5%";
-                albumPos.left = "19.5%";
-                mirrorPos.width = "112px";
-            }
-        }
-
-        // 적용
-        document.getElementById("photo").style.top = photoPos.top;
-        document.getElementById("photo").style.left = photoPos.left;
-        document.getElementById("diary").style.top = diaryPos.top;
-        document.getElementById("diary").style.left = diaryPos.left;
-        document.getElementById("album").style.top = albumPos.top;
-        document.getElementById("album").style.left = albumPos.left;
-
-        const mirrorEl = document.getElementById("mirror");
-        mirrorEl.style.right = mirrorPos.right;
-        mirrorEl.style.top = mirrorPos.top;
-        mirrorEl.style.width = mirrorPos.width;
-        mirrorEl.style.height = mirrorPos.height;
-    }
-
-    // 이벤트 등록
-    window.addEventListener("resize", adjustObjectPositions);
-    window.addEventListener("orientationchange", adjustObjectPositions);
-    window.addEventListener("load", adjustObjectPositions);
-
-    // 초기화
+/* =========================
+   클릭 이벤트
+   ========================= */
+photo.onclick = () => {
+    if (memory.photo) return;
+    memory.photo = true;
+    photo.classList.add("clicked");
+    message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
     updateInventory();
+};
+
+diary.onclick = () => {
+    if (memory.diary) return;
+    memory.diary = true;
+    diary.classList.add("clicked");
+    message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
+    updateInventory();
+};
+
+album.onclick = () => {
+    if (memory.album) return;
+    memory.album = true;
+    album.classList.add("clicked");
+    message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
+    updateInventory();
+};
+
+mirror.onclick = () => {
+    if (!(memory.photo && memory.diary && memory.album)) {
+        message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
+        return;
+    }
+
+    message.innerHTML = "거울 속으로 손을 뻗는다...";
+
+    setTimeout(() => {
+        room.style.transition = "opacity 1.8s";
+        room.style.opacity = "0";
+    }, 800);
+
+    setTimeout(() => {
+        message.innerHTML = "과거로... 돌아가고 있다.";
+    }, 2200);
+};
+
+/* =========================
+   화면 변경 대응
+   ========================= */
+window.addEventListener("resize", adjustObjectPositions);
+window.addEventListener("orientationchange", adjustObjectPositions);
+window.addEventListener("load", adjustObjectPositions);
+
+updateInventory();
 </script>
 </body>
 </html>
