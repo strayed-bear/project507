@@ -18,10 +18,10 @@
         position: relative;
         width: 100vw;
         height: 100vh;
-        background-size: cover;           /* ← 중요 */
-        background-position: center;      /* ← 중요 */
+        background-size: cover;
+        background-position: center;
         background-repeat: no-repeat;
-        background-image: url('./image/living-room-bg.jpg');   /* ← 여기 파일명 정확히 써주세요 */
+        background-image: url('./image/living-room-bg.jpg');
     }
 
     .object {
@@ -43,12 +43,13 @@
     #photo  { top: 42%; left: 18%; }
     #diary  { top: 55%; left: 48%; }
     #album  { top: 38%; left: 72%; }
-    #mirror { 
-        position: absolute; 
-        right: 8%; 
-        top: 25%; 
-        width: 110px; 
-        height: 280px; 
+
+    #mirror {
+        position: absolute;
+        right: 8%;
+        top: 25%;
+        width: 110px;
+        height: 280px;
         background: rgba(255,255,255,0.15);
         border: 6px solid #ddd;
         border-radius: 8px;
@@ -82,31 +83,31 @@
     .mirror-active {
         box-shadow: 0 0 30px cyan;
         border-color: cyan;
-        
-/* 모바일 세로 화면 최적화 (Galaxy S25, 대부분의 안드로이드 폰) */
-@media (max-width: 480px) and (orientation: portrait) {
-    #photo  { top: 35%; left: 15%; }   /* 조금 더 위 + 왼쪽 */
-    #diary  { top: 52%; left: 45%; }   /* 중앙 아래쪽 */
-    #album  { top: 32%; left: 68%; }   /* 오른쪽 위쪽 */
-    
-    #mirror { 
-        right: 6%; 
-        top: 18%; 
-        width: 95px; 
-        height: 240px; 
     }
 
-    #message {
-        bottom: 12%;
-        font-size: 1rem;
-        padding: 15px 20px;
-    }
+    /* ==================== 모바일 최적화 ==================== */
+    @media (max-width: 480px) and (orientation: portrait) {
+        #photo  { top: 35%; left: 15%; }
+        #diary  { top: 53%; left: 45%; }
+        #album  { top: 32%; left: 70%; }
 
-    .object {
-        padding: 10px 14px;
-        font-size: 14px;
-    }
-}
+        #mirror {
+            right: 6%;
+            top: 20%;
+            width: 95px;
+            height: 245px;
+        }
+
+        #message {
+            bottom: 12%;
+            font-size: 1rem;
+            padding: 15px 20px;
+        }
+
+        .object {
+            padding: 10px 14px;
+            font-size: 14px;
+        }
     }
 </style>
 </head>
