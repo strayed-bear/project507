@@ -82,6 +82,31 @@
     .mirror-active {
         box-shadow: 0 0 30px cyan;
         border-color: cyan;
+        
+/* 모바일 세로 화면 최적화 (Galaxy S25, 대부분의 안드로이드 폰) */
+@media (max-width: 480px) and (orientation: portrait) {
+    #photo  { top: 35%; left: 15%; }   /* 조금 더 위 + 왼쪽 */
+    #diary  { top: 52%; left: 45%; }   /* 중앙 아래쪽 */
+    #album  { top: 32%; left: 68%; }   /* 오른쪽 위쪽 */
+    
+    #mirror { 
+        right: 6%; 
+        top: 18%; 
+        width: 95px; 
+        height: 240px; 
+    }
+
+    #message {
+        bottom: 12%;
+        font-size: 1rem;
+        padding: 15px 20px;
+    }
+
+    .object {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+}
     }
 </style>
 </head>
