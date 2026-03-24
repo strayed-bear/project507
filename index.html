@@ -58,8 +58,24 @@ body {
 }
 
 .mirror-active {
-    box-shadow: 0 0 30px cyan;
     border-color: cyan;
+    box-shadow:
+        0 0 20px cyan,
+        0 0 40px cyan,
+        0 0 70px rgba(0,255,255,0.7);
+    background: rgba(255,255,255,0.35);
+    animation: mirrorGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes mirrorGlow {
+    from {
+        filter: brightness(1);
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        filter: brightness(1.5);
+        transform: translate(-50%, -50%) scale(1.03);
+    }
 }
 
 /* 메시지 */
