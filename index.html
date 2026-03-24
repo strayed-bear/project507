@@ -1,9 +1,95 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0", maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Project 507</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Project 507</title>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            overflow: hidden;
+        }
+
+        #room {
+            position: relative;
+            width: 100vw;
+            height: 100dvh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: url('./image/living-room-bg.jpg');
+        }
+
+        .object {
+            position: absolute;
+            cursor: pointer;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .object:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.08);
+        }
+
+        .object.clicked {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #photo  { top: 48%; left: 46.5%; }
+        #diary  { top: 71%; left: 46%; }
+        #album  { top: 38%; left: 19%; }
+
+        #mirror {
+            right: 8.5%;
+            top: 31%;
+            width: 125px;
+            height: 305px;
+            background: rgba(255,255,255,0.15);
+            border: 6px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        #message {
+            position: absolute;
+            bottom: 8%;
+            left: 5%;
+            right: 5%;
+            background: rgba(0,0,0,0.75);
+            padding: 18px 25px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            min-height: 70px;
+        }
+
+        #inventory {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 12px 18px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .mirror-active {
+            box-shadow: 0 0 30px cyan;
+            border-color: cyan;
+        }
+    </style>
 </head>
 <body>
 
@@ -12,12 +98,10 @@
         수집한 기억:<br>
         <div id="items"></div>
     </div>
-
-    <div id="photo"  class="object">사진</div>
-    <div id="diary"  class="object">다이어리</div>
-    <div id="album"  class="object">앨범</div>
+    <div id="photo" class="object">사진</div>
+    <div id="diary" class="object">다이어리</div>
+    <div id="album" class="object">앨범</div>
     <div id="mirror"></div>
-
     <div id="message">
         눈을 뜨니 익숙한 거실이다...<br>
         주변을 천천히 둘러보자.
@@ -60,7 +144,7 @@
     document.getElementById("diary").onclick = () => {
         if (memory.diary) return;
         memory.diary = true;
-        document.getElementById("photo").classList.add("clicked");
+        document.getElementById("diary").classList.add("clicked");
         message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
         updateInventory();
     };
@@ -68,7 +152,7 @@
     document.getElementById("album").onclick = () => {
         if (memory.album) return;
         memory.album = true;
-        document.getElementById("photo").classList.add("clicked");
+        document.getElementById("album").classList.add("clicked");
         message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
         updateInventory();
     };
@@ -78,9 +162,8 @@
             message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
             return;
         }
-
         message.innerHTML = "거울 속으로 손을 뻗는다...";
-        
+       
         setTimeout(() => {
             document.getElementById("room").style.transition = "opacity 1.8s";
             document.getElementById("room").style.opacity = "0";
@@ -88,63 +171,55 @@
 
         setTimeout(() => {
             message.innerHTML = "과거로... 돌아가고 있다.";
-            // 여기서 다음 장면으로 넘어가면 됩니다 (나중에 구현)
         }, 2200);
     };
-    
-    <script>
+
     // ==================== 기기 감지 + 자동 위치 조정 ====================
     function adjustObjectPositions() {
         const width = window.innerWidth;
-        const height = window.innerHeight;
-        const isPortrait = height > width;
+        const isPortrait = window.innerHeight > width;
         const isMobile = width < 500 && isPortrait;
-    
-        // 기본 위치 (PC나 큰 화면)
+
         let photoPos = { top: "48%", left: "46.5%" };
         let diaryPos = { top: "71%", left: "46%" };
         let albumPos = { top: "38%", left: "19%" };
         let mirrorPos = { right: "8.5%", top: "31%", width: "125px", height: "305px" };
-    
+
         if (isMobile) {
-            // 대부분의 모바일 (S25, iPhone 등 공통)
             photoPos = { top: "44%", left: "46%" };
             diaryPos = { top: "69%", left: "45.5%" };
             albumPos = { top: "37%", left: "18%" };
             mirrorPos = { right: "7%", top: "29%", width: "108px", height: "265px" };
-    
-            // 아이폰 계열은 화면이 조금 더 넓게 느껴지므로 미세 조정
+
+            // 아이폰은 화면이 조금 더 넓게 느껴짐
             if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
                 photoPos.left = "47.5%";
                 albumPos.left = "19.5%";
                 mirrorPos.width = "112px";
             }
         }
-    
-        // 실제 적용
+
+        // 적용
         document.getElementById("photo").style.top = photoPos.top;
         document.getElementById("photo").style.left = photoPos.left;
-    
         document.getElementById("diary").style.top = diaryPos.top;
         document.getElementById("diary").style.left = diaryPos.left;
-    
         document.getElementById("album").style.top = albumPos.top;
         document.getElementById("album").style.left = albumPos.left;
-    
-        const mirror = document.getElementById("mirror");
-        mirror.style.right = mirrorPos.right;
-        mirror.style.top = mirrorPos.top;
-        mirror.style.width = mirrorPos.width;
-        mirror.style.height = mirrorPos.height;
+
+        const mirrorEl = document.getElementById("mirror");
+        mirrorEl.style.right = mirrorPos.right;
+        mirrorEl.style.top = mirrorPos.top;
+        mirrorEl.style.width = mirrorPos.width;
+        mirrorEl.style.height = mirrorPos.height;
     }
-    
-    // 창 크기 바뀔 때마다 자동으로 다시 조정
+
+    // 이벤트 등록
     window.addEventListener("resize", adjustObjectPositions);
     window.addEventListener("orientationchange", adjustObjectPositions);
-    
-    // 페이지 로드될 때 한 번 실행
     window.addEventListener("load", adjustObjectPositions);
-    </script>
+
+    // 초기화
     updateInventory();
 </script>
 </body>
