@@ -174,6 +174,7 @@ function updateInventory() {
    ========================= */
 photo.onclick = () => {
     if (memory.photo) return;
+    navigator.vibrate(30); // 진동
     memory.photo = true;
     photo.classList.add("clicked");
     message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
@@ -182,6 +183,7 @@ photo.onclick = () => {
 
 diary.onclick = () => {
     if (memory.diary) return;
+    navigator.vibrate(30); // 진동
     memory.diary = true;
     diary.classList.add("clicked");
     message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
@@ -190,6 +192,7 @@ diary.onclick = () => {
 
 album.onclick = () => {
     if (memory.album) return;
+    navigator.vibrate(30); // 진동
     memory.album = true;
     album.classList.add("clicked");
     message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
@@ -197,6 +200,7 @@ album.onclick = () => {
 };
 
 mirror.onclick = () => {
+    navigator.vibrate([40, 60, 40]); // 약한 진동 → 잠깐 멈춤 → 다시 진동
     if (!(memory.photo && memory.diary && memory.album)) {
         message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
         return;
