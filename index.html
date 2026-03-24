@@ -4,151 +4,173 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project 507</title>
-
 <style>
-body{
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#111;
-    color:white;
-    text-align:center;
-}
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        overflow: hidden;
+    }
 
-#room{
-    position:relative;
-    width:100%;
-    height:100vh;
-    background:#2a2a2a;
-}
+    #room {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background-size: cover;           /* ← 중요 */
+        background-position: center;      /* ← 중요 */
+        background-repeat: no-repeat;
+        background-image: url('livingroom_start.jpg');   /* ← 여기 파일명 정확히 써주세요 */
+    }
 
-.object{
-    position:absolute;
-    cursor:pointer;
-    padding:10px;
-    background:#444;
-    border-radius:8px;
-}
+    .object {
+        position: absolute;
+        cursor: pointer;
+        padding: 12px 16px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        color: white;
+        font-size: 15px;
+        transition: all 0.2s;
+    }
 
-#photo{ top:40%; left:20%; }
-#diary{ top:60%; left:50%; }
-#album{ top:35%; left:70%; }
+    .object:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
 
-#mirror{
-    position:absolute;
-    right:5%;
-    top:20%;
-    width:120px;
-    height:300px;
-    background:#777;
-    border:4px solid #aaa;
-}
+    #photo  { top: 42%; left: 18%; }
+    #diary  { top: 55%; left: 48%; }
+    #album  { top: 38%; left: 72%; }
+    #mirror { 
+        position: absolute; 
+        right: 8%; 
+        top: 25%; 
+        width: 110px; 
+        height: 280px; 
+        background: rgba(255,255,255,0.15);
+        border: 6px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    }
 
-#message{
-    position:absolute;
-    bottom:20px;
-    width:100%;
-    font-size:18px;
-}
+    #message {
+        position: absolute;
+        bottom: 8%;
+        left: 5%;
+        right: 5%;
+        background: rgba(0,0,0,0.75);
+        padding: 18px 25px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        min-height: 70px;
+    }
 
-#inventory{
-    position:absolute;
-    top:10px;
-    left:10px;
-    text-align:left;
-}
+    #inventory {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(0,0,0,0.6);
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-align: left;
+        font-size: 14px;
+    }
 
-.mirror-active{
-    box-shadow:0 0 20px cyan;
-}
+    .mirror-active {
+        box-shadow: 0 0 30px cyan;
+        border-color: cyan;
+    }
 </style>
 </head>
-
 <body>
 
 <div id="room">
+    <div id="inventory">
+        수집한 기억:<br>
+        <div id="items"></div>
+    </div>
 
-<div id="inventory">
-수집한 기억:
-<div id="items"></div>
-</div>
+    <div id="photo"  class="object">사진</div>
+    <div id="diary"  class="object">다이어리</div>
+    <div id="album"  class="object">앨범</div>
+    <div id="mirror"></div>
 
-<div id="photo" class="object">사진</div>
-<div id="diary" class="object">다이어리</div>
-<div id="album" class="object">앨범</div>
-
-<div id="mirror"></div>
-
-<div id="message">
-물건들을 클릭하여 현재 상황을 파악해보자
-</div>
-
+    <div id="message">
+        눈을 뜨니 익숙한 거실이다...<br>
+        주변을 천천히 둘러보자.
+    </div>
 </div>
 
 <script>
+    let memory = {
+        photo: false,
+        diary: false,
+        album: false
+    };
 
-let memory = {
-    photo:false,
-    diary:false,
-    album:false
-};
+    const message = document.getElementById("message");
+    const mirror = document.getElementById("mirror");
+    const items = document.getElementById("items");
 
-const message = document.getElementById("message");
-const mirror = document.getElementById("mirror");
-const items = document.getElementById("items");
+    function updateInventory() {
+        items.innerHTML = `
+            사진: ${memory.photo ? "✔" : "❌"}<br>
+            다이어리: ${memory.diary ? "✔" : "❌"}<br>
+            앨범: ${memory.album ? "✔" : "❌"}
+        `;
 
-function updateInventory(){
-    items.innerHTML = `
-    사진: ${memory.photo ? "✔" : "❌"} <br>
-    다이어리: ${memory.diary ? "✔" : "❌"} <br>
-    앨범: ${memory.album ? "✔" : "❌"}
-    `;
-
-    if(memory.photo && memory.diary && memory.album){
-        mirror.classList.add("mirror-active");
-        message.innerText = "거울이 이상하게 반응하고 있다...";
-    }
-}
-
-document.getElementById("photo").onclick = () => {
-    memory.photo = true;
-    message.innerText = "그날 찍은 사진이다.";
-    updateInventory();
-};
-
-document.getElementById("diary").onclick = () => {
-    memory.diary = true;
-    message.innerText = "그날의 감정이 적혀 있다.";
-    updateInventory();
-};
-
-document.getElementById("album").onclick = () => {
-    memory.album = true;
-    message.innerText = "추억이 담긴 앨범이다.";
-    updateInventory();
-};
-
-mirror.onclick = () => {
-
-    if(!(memory.photo && memory.diary && memory.album)){
-        message.innerText = "아직 떠올릴 기억이 부족하다.";
-        return;
+        if (memory.photo && memory.diary && memory.album) {
+            mirror.classList.add("mirror-active");
+            message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
+        }
     }
 
-    message.innerText = "눈을 감고 거울로 다가간다...";
+    // 클릭 이벤트
+    document.getElementById("photo").onclick = () => {
+        if (memory.photo) return;
+        memory.photo = true;
+        message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
+        updateInventory();
+    };
 
-    setTimeout(()=>{
-        document.body.style.background="black";
-        message.innerText="...";
-    },1000);
+    document.getElementById("diary").onclick = () => {
+        if (memory.diary) return;
+        memory.diary = true;
+        message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
+        updateInventory();
+    };
 
-    setTimeout(()=>{
-        message.innerText="과거로 이동했다.";
-    },2500);
-};
+    document.getElementById("album").onclick = () => {
+        if (memory.album) return;
+        memory.album = true;
+        message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
+        updateInventory();
+    };
 
-updateInventory();
+    mirror.onclick = () => {
+        if (!(memory.photo && memory.diary && memory.album)) {
+            message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
+            return;
+        }
 
+        message.innerHTML = "거울 속으로 손을 뻗는다...";
+        
+        setTimeout(() => {
+            document.getElementById("room").style.transition = "opacity 1.8s";
+            document.getElementById("room").style.opacity = "0";
+        }, 800);
+
+        setTimeout(() => {
+            message.innerHTML = "과거로... 돌아가고 있다.";
+            // 여기서 다음 장면으로 넘어가면 됩니다 (나중에 구현)
+        }, 2200);
+    };
+
+    // 초기화
+    updateInventory();
 </script>
-
 </body>
 </html>
