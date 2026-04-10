@@ -101,26 +101,53 @@ body {
     border-radius: 10px;
     font-size: 14px;
 }
+    /* 장면 전환용 */
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out;
+}
+
+.scene.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+    
 </style>
 </head>
 
 <body>
 
 <div id="room">
-    <div id="inventory">
-        수집한 기억:<br>
-        <div id="items"></div>
+    <!-- 거실 장면 -->
+    <div id="scene-living" class="scene">
+        <div id="inventory">
+            수집한 기억:<br>
+            <div id="items"></div>
+        </div>
+    
+        <div id="photo" class="object">사진</div>
+        <div id="diary" class="object">다이어리</div>
+        <div id="album" class="object">앨범</div>
+    
+        <div id="mirror"></div>
+    
+        <div id="message">
+            눈을 뜨니 익숙한 거실이다...<br>
+            주변을 천천히 둘러보자.
+        </div>
     </div>
-
-    <div id="photo" class="object">사진</div>
-    <div id="diary" class="object">다이어리</div>
-    <div id="album" class="object">앨범</div>
-
-    <div id="mirror"></div>
-
-    <div id="message">
-        눈을 뜨니 익숙한 거실이다...<br>
-        주변을 천천히 둘러보자.
+    <!-- 교실 장면 (처음엔 숨김) -->
+    <div id="scene-classroom" class="scene hidden">
+        <div id="classroom-message" class="message-box">
+            <!-- 여기에 교실 메시지 -->
+        </div>
+        <!-- 책상 위 문서 오브젝트 -->
+        <div id="document" class="object">문서</div>
     </div>
 </div>
 
@@ -222,7 +249,8 @@ album.onclick = () => {
 };
 
 mirror.onclick = () => {
-    navigator.vibrate([40, 60, 40]); // 약한 진동 → 잠깐 멈춤 → 다시 진동
+    navigator.vibrate([40, 60, 40]);
+
     if (!(memory.photo && memory.diary && memory.album)) {
         message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
         return;
@@ -231,13 +259,20 @@ mirror.onclick = () => {
     message.innerHTML = "거울 속으로 손을 뻗는다...";
 
     setTimeout(() => {
-        room.style.transition = "opacity 1.8s";
-        room.style.opacity = "0";
-    }, 800);
+        // 거실 장면 fade out
+        document.getElementById("scene-living").classList.add("hidden");
+        
+        // 교실 장면 fade in
+        const classroomScene = document.getElementById("scene-classroom");
+        classroomScene.classList.remove("hidden");
+        classroomScene.style.backgroundImage = "url('./image/classroom-bg.jpg')";
+        classroomScene.style.backgroundSize = "cover";
+        classroomScene.style.backgroundPosition = "center";
 
-    setTimeout(() => {
-        message.innerHTML = "과거로... 돌아가고 있다.";
-    }, 2200);
+        // 교실 메시지
+        document.getElementById("classroom-message").innerHTML = 
+            "교실에 앉아 있다...<br>책상 위에 익숙한 문서가 놓여 있다.";
+    }, 1200);
 };
 
 /* =========================
