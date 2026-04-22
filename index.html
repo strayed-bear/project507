@@ -2,310 +2,249 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Project 507</title>
-
 <style>
-body {
-    margin: 0;
-    padding: 0;
-    background: #111;
-    color: white;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
-
-#room {
-    position: relative;
-    width: 100vw;
-    height: 100dvh;
-    background-image: url('./image/living-room-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-/* 오브젝트 기본 스타일 */
-.object {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    padding: 12px 16px;
-    background: rgba(0,0,0,0.55);
-    border-radius: 10px;
-    font-size: 15px;
-    transition: all 0.2s;
-}
-
-.object:hover {
-    background: rgba(255,255,255,0.25);
-    transform: translate(-50%, -50%) scale(1.08);
-}
-
-.object.clicked {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* 거울 */
-#mirror {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    background: rgba(255,255,255,0.15);
-    border: 6px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-
-.mirror-active {
-    border-color: cyan;
-    box-shadow:
-        0 0 20px cyan,
-        0 0 40px cyan,
-        0 0 70px rgba(0,255,255,0.7);
-    background: rgba(255,255,255,0.35);
-    animation: mirrorGlow 1.2s ease-in-out infinite alternate;
-}
-
-@keyframes mirrorGlow {
-    from {
-        filter: brightness(1);
-        transform: translate(-50%, -50%) scale(1);
-    }
-    to {
-        filter: brightness(1.5);
-        transform: translate(-50%, -50%) scale(1.03);
-    }
-}
-
-/* 메시지 */
-#message {
-    position: absolute;
-    bottom: calc(8% + env(safe-area-inset-bottom));
-    left: 5%;
-    right: 5%;
-    background: rgba(0,0,0,0.75);
-    padding: 18px 25px;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    line-height: 1.5;
-}
-
-/* 인벤토리 */
-#inventory {
-    position: absolute;
-    top: calc(15px + env(safe-area-inset-top));
-    left: calc(15px + env(safe-area-inset-left));
-    background: rgba(0,0,0,0.6);
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-}
-    /* 장면 전환용 */
-.scene {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 1;
-    transition: opacity 1.5s ease-in-out;
-}
-
-.scene.hidden {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-}
+    body { margin:0; padding:0; background:#111; color:white; font-family:Arial, sans-serif; overflow:hidden; }
     
-.message-box {
-    position: absolute;
-    bottom: 10%;
-    left: 5%;
-    right: 5%;
-    background: rgba(0,0,0,0.75);
-    padding: 18px;
-    border-radius: 12px;
-}
-    
+    #room { position:relative; width:100vw; height:100dvh; background-size:cover; background-position:center; background-repeat:no-repeat; }
+
+    /* 장면 공통 */
+    .scene { position:absolute; top:0; left:0; width:100%; height:100%; opacity:1; transition:opacity 1.5s ease-in-out; }
+    .scene.hidden { opacity:0; pointer-events:none; }
+
+    .object {
+        position:absolute;
+        transform:translate(-50%, -50%);
+        cursor:pointer;
+        padding:12px 16px;
+        background:rgba(0,0,0,0.55);
+        border-radius:10px;
+        font-size:15px;
+        transition:all 0.2s;
+    }
+    .object:hover { background:rgba(255,255,255,0.25); transform:translate(-50%, -50%) scale(1.08); }
+    .object.clicked { opacity:0.6; pointer-events:none; }
+
+    /* 거울 */
+    #mirror { background:rgba(255,255,255,0.15); border:6px solid #ddd; border-radius:8px; box-shadow:0 0 15px rgba(255,255,255,0.3); }
+    .mirror-active { border-color:cyan; box-shadow:0 0 20px cyan, 0 0 40px cyan, 0 0 70px rgba(0,255,255,0.7); animation:mirrorGlow 1.2s ease-in-out infinite alternate; }
+    @keyframes mirrorGlow { from {filter:brightness(1); transform:translate(-50%, -50%) scale(1);} to {filter:brightness(1.5); transform:translate(-50%, -50%) scale(1.03);} }
+
+    /* 메시지 */
+    #message {
+        position:absolute; bottom:calc(8% + env(safe-area-inset-bottom)); left:5%; right:5%;
+        background:rgba(0,0,0,0.75); padding:18px 25px; border-radius:12px; font-size:1.1rem; line-height:1.5;
+    }
+
+    /* 인벤토리 */
+    #inventory {
+        position:absolute; top:calc(15px + env(safe-area-inset-top)); left:calc(15px + env(safe-area-inset-left));
+        background:rgba(0,0,0,0.6); padding:12px 18px; border-radius:10px; font-size:14px;
+    }
+
+    /* 사물함 클로즈업 화면 */
+    #locker-view {
+        position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92);
+        display:none; align-items:center; justify-content:center; z-index:100;
+    }
+    #locker-closeup {
+        width:85%; max-width:520px; border:8px solid #555; border-radius:12px;
+        background:url('./image/locker-closeup.jpg') center/cover;   /* ← 사물함 정면 이미지 파일명 */
+        position:relative; height:70vh; box-shadow:0 0 30px rgba(0,0,0,0.8);
+    }
 </style>
 </head>
-
 <body>
 
 <div id="room">
     <!-- 거실 장면 -->
     <div id="scene-living" class="scene">
-        <div id="inventory">
-            수집한 기억:<br>
-            <div id="items"></div>
-        </div>
-    
+        <div id="inventory">수집한 기억:<br><div id="items"></div></div>
         <div id="photo" class="object">사진</div>
         <div id="diary" class="object">다이어리</div>
         <div id="album" class="object">앨범</div>
-    
         <div id="mirror"></div>
-    
-        <div id="message">
-            눈을 뜨니 익숙한 거실이다...<br>
-            주변을 천천히 둘러보자.
-        </div>
+        <div id="message">눈을 뜨니 익숙한 거실이다...<br>주변을 천천히 둘러보자.</div>
     </div>
-    <!-- 교실 장면 (처음엔 숨김) -->
-    <div id="scene-classroom" class="scene hidden">
-        <div id="classroom-message" class="message-box">
-            <!-- 여기에 교실 메시지 -->
-        </div>
-        <!-- 책상 위 문서 오브젝트 -->
-        <div id="document" class="object">문서</div>
+
+    <!-- 교실 장면 -->
+    <div id="scene-classroom" class="scene hidden" style="background-image:url('./image/classroom-bg.jpg');">
+        <div id="inventory">수집한 기억:<br><div id="items"></div></div>
+        <div id="message-classroom"></div>
+        
+        <!-- 사물함 (왼쪽 중간) -->
+        <div id="locker" class="object" style="top:48%; left:22%; padding:18px 24px; font-size:16px;">사물함</div>
+        
+        <!-- 책상 위 지원서 (필요시 추가) -->
+        <div id="document" class="object" style="top:68%; left:52%;">대학 지원서</div>
+    </div>
+
+    <!-- 사물함 클로즈업 화면 -->
+    <div id="locker-view">
+	<div id="locker-closeup">
+    		<!-- 포스트잇 -->
+    		<div id="postit" class="object" style="top:28%; left:68%; padding:10px 14px; font-size:13px; background:rgba(255,240,180,0.95); color:#333;">포스트잇</div>
+    
+    		<!-- 자물쇠 -->
+    		<div id="lock" class="object" style="top:52%; left:52%; padding:14px 28px; font-size:18px; background:#333;">🔒</div>
+
+    		<!-- 방탈출 스타일 메시지 박스 (아래쪽 고정) -->
+    		<div id="locker-message" style="position: absolute; bottom: 8%; left: 5%; right: 5%; 
+         		background: rgba(0, 0, 0, 0.82); 
+         		color: white; 
+         		padding: 18px 24px; 
+         		border-radius: 12px; 
+         		font-size: 1.08rem; 
+         		line-height: 1.55; 
+        		box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+         		display: none; 
+         		text-align: center;">
+    		</div>
+	</div>
     </div>
 </div>
 
 <script>
+    let memory = { 
+        photo: false, 
+        diary: false, 
+        album: false, 
+        tape: false, 
+        pen: false 
+    };
 
-let waitingForMirrorMessage = false;
-    
-const photo = document.getElementById("photo");
-const diary = document.getElementById("diary");
-const album = document.getElementById("album");
-const mirror = document.getElementById("mirror");
-    
-let memory = {
-    photo: false,
-    diary: false,
-    album: false
-};
+    const messageLiving = document.getElementById("message");
+    const messageClassroom = document.getElementById("message-classroom");
+    const items = document.getElementById("items");
+    const room = document.getElementById("room");
 
-const message = document.getElementById("message");
-const items = document.getElementById("items");
-const room = document.getElementById("room");
+    const photo = document.getElementById("photo");
+    const diary = document.getElementById("diary");
+    const album = document.getElementById("album");
+    const mirror = document.getElementById("mirror");
+    const locker = document.getElementById("locker");
+    const lock = document.getElementById("lock");
+    const postit = document.getElementById("postit");
+    const lockerView = document.getElementById("locker-view");
 
-/* =========================
-   배경 기준 좌표 시스템
-   ========================= */
-const layout = {
-    photo: { x: 0.465, y: 0.48 },
-    diary: { x: 0.46, y: 0.71 },
-    album: { x: 0.19, y: 0.38 },
-    mirror: { x: 0.815, y: 0.61, w: 0.2, h: 0.28 }
-};
-
-function placeObject(el, x, y) {
-    const w = room.clientWidth;
-    const h = room.clientHeight;
-
-    el.style.left = (w * x) + "px";
-    el.style.top = (h * y) + "px";
-}
-
-function adjustObjectPositions() {
-
-    placeObject(photo, layout.photo.x, layout.photo.y);
-    placeObject(diary, layout.diary.x, layout.diary.y);
-    placeObject(album, layout.album.x, layout.album.y);
-
-    const w = room.clientWidth;
-    const h = room.clientHeight;
-
-    mirror.style.left = (w * layout.mirror.x) + "px";
-    mirror.style.top = (h * layout.mirror.y) + "px";
-    mirror.style.width = (w * layout.mirror.w) + "px";
-    mirror.style.height = (h * layout.mirror.h) + "px";
-}
-
-/* =========================
-   인벤토리 업데이트
-   ========================= */
-function updateInventory() {
-    items.innerHTML = `
-        사진: ${memory.photo ? "✔" : "❌"}<br>
-        다이어리: ${memory.diary ? "✔" : "❌"}<br>
-        앨범: ${memory.album ? "✔" : "❌"}
-    `;
-
-    if (memory.photo && memory.diary && memory.album) {
-    waitingForMirrorMessage = true;
-    }
-}
-
-/* =========================
-   클릭 이벤트
-   ========================= */
-photo.onclick = () => {
-    if (memory.photo) return;
-    navigator.vibrate(30); // 진동
-    memory.photo = true;
-    photo.classList.add("clicked");
-    message.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지.";
-    updateInventory();
-};
-
-diary.onclick = () => {
-    if (memory.diary) return;
-    navigator.vibrate(30); // 진동
-    memory.diary = true;
-    diary.classList.add("clicked");
-    message.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리...";
-    updateInventory();
-};
-
-album.onclick = () => {
-    if (memory.album) return;
-    navigator.vibrate(30); // 진동
-    memory.album = true;
-    album.classList.add("clicked");
-    message.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어.";
-    updateInventory();
-};
-
-mirror.onclick = () => {
-    navigator.vibrate([40, 60, 40]);
-
-    if (!(memory.photo && memory.diary && memory.album)) {
-        message.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
-        return;
+    function updateInventory() {
+        items.innerHTML = `
+            사진: ${memory.photo ? "✔" : "❌"}<br>
+            다이어리: ${memory.diary ? "✔" : "❌"}<br>
+            앨범: ${memory.album ? "✔" : "❌"}<br>
+            ${memory.tape ? "수정테이프: ✔" : ""} 
+            ${memory.pen ? "볼펜: ✔" : ""}
+        `;
     }
 
-    message.innerHTML = "거울 속으로 손을 뻗는다...";
-
-    setTimeout(() => {
-        // 거실 장면 fade out
-        document.getElementById("scene-living").classList.add("hidden");
+    // 위치 조정 함수
+    function adjustObjectPositions() {
+        const w = room.clientWidth;
+        const h = room.clientHeight;
         
-        // 교실 장면 fade in
-        const classroomScene = document.getElementById("scene-classroom");
-        classroomScene.classList.remove("hidden");
-        classroomScene.style.backgroundImage = "url('./image/classroom-bg.jpg')";
-        classroomScene.style.backgroundSize = "cover";
-        classroomScene.style.backgroundPosition = "center";
+        photo.style.left = (w * 0.465) + "px"; photo.style.top = (h * 0.48) + "px";
+        diary.style.left = (w * 0.46) + "px";  diary.style.top = (h * 0.71) + "px";
+        album.style.left = (w * 0.19) + "px";  album.style.top = (h * 0.38) + "px";
+        
+        mirror.style.left = (w * 0.815) + "px";
+        mirror.style.top = (h * 0.61) + "px";
+        mirror.style.width = (w * 0.2) + "px";
+        mirror.style.height = (h * 0.28) + "px";
+    }
 
-        // 교실 메시지
-        document.getElementById("classroom-message").innerHTML = 
-            "교실에 앉아 있다...<br>책상 위에 익숙한 문서가 놓여 있다.";
-    }, 1200);
-};
+    // ==================== 거울 클릭 → 교실 이동 ====================
+    mirror.onclick = () => {
+        if (!(memory.photo && memory.diary && memory.album)) {
+            messageLiving.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
+            return;
+        }
+        messageLiving.innerHTML = "거울 속으로 손을 뻗는다...";
+        
+        setTimeout(() => {
+            document.getElementById("scene-living").classList.add("hidden");
+            const classroom = document.getElementById("scene-classroom");
+            classroom.classList.remove("hidden");
+            messageClassroom.innerHTML = "교실에 앉아 있다...<br>책상 위에 익숙한 지원서가 놓여 있다.";
+            adjustObjectPositions();
+        }, 1200);
+    };
 
-/* =========================
-   화면 변경 대응
-   ========================= */
-window.addEventListener("resize", adjustObjectPositions);
-window.addEventListener("orientationchange", adjustObjectPositions);
-window.addEventListener("load", adjustObjectPositions);
+    // ==================== 사물함 클릭 ====================
+    locker.onclick = () => {
+        lockerView.style.display = "flex";
+    };
 
-updateInventory();
-document.addEventListener("click", (e) => {
+    // ==================== 포스트잇 클릭 ====================
+	postit.onclick = () => {
+    		const lockerMsg = document.getElementById("locker-message");
+    
+    		lockerMsg.innerHTML = '메모에 "오늘 들을 노래: 케이윌의 오늘부터 1일..."이라고 적혀 있다.';
+    		lockerMsg.style.display = "block";
 
-    if (!waitingForMirrorMessage) return;
+    // 3.5초 후 자동으로 사라지게 (방탈출 느낌)
+    		setTimeout(() => {
+        		lockerMsg.style.display = "none";
+    		}, 3500);
+	};
 
-    // 오브젝트 클릭은 제외
-    if (e.target.classList.contains("object") || e.target.id === "mirror") return;
+    // ==================== 자물쇠 클릭 ====================
+    lock.onclick = () => {
+        const pw = prompt("4자리 비밀번호를 입력하세요\n(힌트: 오늘부터 1일 노래 제목)");
+        
+        if (pw === null) return; // 취소 버튼 처리
 
-    waitingForMirrorMessage = false;
+        if (pw === "0116") {
+            alert("자물쇠가 열렸다!");
+            lockerView.style.display = "none";
+            
+            messageClassroom.innerHTML = "수정테이프와 볼펜을 얻었다!";
+            memory.tape = true;
+            memory.pen = true;
+            updateInventory();
 
-    mirror.classList.add("mirror-active");
-    message.innerHTML = "거울이 부드럽게 빛나기 시작했다...";
-});
-</script>
-</body>
+            setTimeout(() => {
+                messageClassroom.innerHTML = "이제 지원서를 수정할 수 있겠어...";
+            }, 2500);
+        } else {
+            alert("비밀번호가 틀렸다...");
+        }
+    };
+
+    // ==================== 이벤트 등록 ====================
+    window.addEventListener("resize", adjustObjectPositions);
+    window.addEventListener("orientationchange", adjustObjectPositions);
+    window.addEventListener("load", () => {
+        adjustObjectPositions();
+        updateInventory();
+    });
+
+    // 기존 오브젝트 클릭 이벤트
+    photo.onclick = () => { 
+        if(!memory.photo){ 
+            memory.photo = true; 
+            photo.classList.add("clicked"); 
+            messageLiving.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지."; 
+            updateInventory(); 
+        }
+    };
+
+    diary.onclick = () => { 
+        if(!memory.diary){ 
+            memory.diary = true; 
+            diary.classList.add("clicked"); 
+            messageLiving.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리..."; 
+            updateInventory(); 
+        }
+    };
+
+    album.onclick = () => { 
+        if(!memory.album){ 
+            memory.album = true; 
+            album.classList.add("clicked"); 
+            messageLiving.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어."; 
+            updateInventory(); 
+        }
+    };
+</script></body>
 </html>
