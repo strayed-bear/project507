@@ -157,7 +157,146 @@ body { margin:0; padding:0; background:#111; color:white; font-family:Arial, san
 </div>
 
 <script>
-// (JS는 기존 그대로 써도 문제 없음)
+    let memory = { 
+        photo: false, 
+        diary: false, 
+        album: false, 
+        tape: false, 
+        pen: false 
+    };
+
+    const messageLiving = document.getElementById("message");
+    const messageClassroom = document.getElementById("message-classroom");
+    const items = document.getElementById("items");
+    const room = document.getElementById("room");
+
+    const photo = document.getElementById("photo");
+    const diary = document.getElementById("diary");
+    const album = document.getElementById("album");
+    const mirror = document.getElementById("mirror");
+    const locker = document.getElementById("locker");
+    const lock = document.getElementById("lock");
+    const postit = document.getElementById("postit");
+    const lockerView = document.getElementById("locker-view");
+
+    function updateInventory() {
+        items.innerHTML = `
+            사진: ${memory.photo ? "✔" : "❌"}<br>
+            다이어리: ${memory.diary ? "✔" : "❌"}<br>
+            앨범: ${memory.album ? "✔" : "❌"}<br>
+            ${memory.tape ? "수정테이프: ✔" : ""} 
+            ${memory.pen ? "볼펜: ✔" : ""}
+        `;
+    }
+
+    // 위치 조정 함수
+    function adjustObjectPositions() {
+        const w = room.clientWidth;
+        const h = room.clientHeight;
+        
+        photo.style.left = (w * 0.465) + "px"; photo.style.top = (h * 0.48) + "px";
+        diary.style.left = (w * 0.46) + "px";  diary.style.top = (h * 0.71) + "px";
+        album.style.left = (w * 0.19) + "px";  album.style.top = (h * 0.38) + "px";
+        
+        mirror.style.left = (w * 0.815) + "px";
+        mirror.style.top = (h * 0.61) + "px";
+        mirror.style.width = (w * 0.2) + "px";
+        mirror.style.height = (h * 0.28) + "px";
+    }
+
+    // ==================== 거울 클릭 → 교실 이동 ====================
+    mirror.onclick = () => {
+        if (!(memory.photo && memory.diary && memory.album)) {
+            messageLiving.innerHTML = "아직 떠올려야 할 기억이 더 있는 것 같다...";
+            return;
+        }
+        messageLiving.innerHTML = "거울 속으로 손을 뻗는다...";
+        
+        setTimeout(() => {
+            document.getElementById("scene-living").classList.add("hidden");
+            const classroom = document.getElementById("scene-classroom");
+            classroom.classList.remove("hidden");
+            messageClassroom.innerHTML = "교실에 앉아 있다...<br>책상 위에 익숙한 지원서가 놓여 있다.";
+            adjustObjectPositions();
+        }, 1200);
+    };
+
+    // ==================== 사물함 클릭 ====================
+    locker.onclick = () => {
+        lockerView.style.display = "flex";
+    };
+
+    // ==================== 포스트잇 클릭 ====================
+	postit.onclick = () => {
+    		const lockerMsg = document.getElementById("locker-message");
+    
+    		lockerMsg.innerHTML = '메모에 "오늘 들을 노래: 케이윌의 오늘부터 1일..."이라고 적혀 있다.';
+    		lockerMsg.style.display = "block";
+
+    // 3.5초 후 자동으로 사라지게 (방탈출 느낌)
+    		setTimeout(() => {
+        		lockerMsg.style.display = "none";
+    		}, 3500);
+	};
+
+    // ==================== 자물쇠 클릭 ====================
+    lock.onclick = () => {
+        const pw = prompt("4자리 비밀번호를 입력하세요\n(힌트: 오늘부터 1일 노래 제목)");
+        
+        if (pw === null) return; // 취소 버튼 처리
+
+        if (pw === "0116") {
+            alert("자물쇠가 열렸다!");
+            lockerView.style.display = "none";
+            
+            messageClassroom.innerHTML = "수정테이프와 볼펜을 얻었다!";
+            memory.tape = true;
+            memory.pen = true;
+            updateInventory();
+
+            setTimeout(() => {
+                messageClassroom.innerHTML = "이제 지원서를 수정할 수 있겠어...";
+            }, 2500);
+        } else {
+            alert("비밀번호가 틀렸다...");
+        }
+    };
+
+    // ==================== 이벤트 등록 ====================
+    window.addEventListener("resize", adjustObjectPositions);
+    window.addEventListener("orientationchange", adjustObjectPositions);
+    window.addEventListener("load", () => {
+        adjustObjectPositions();
+        updateInventory();
+    });
+
+    // 기존 오브젝트 클릭 이벤트
+    photo.onclick = () => { 
+        if(!memory.photo){ 
+            memory.photo = true; 
+            photo.classList.add("clicked"); 
+            messageLiving.innerHTML = "우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지."; 
+            updateInventory(); 
+        }
+    };
+
+    diary.onclick = () => { 
+        if(!memory.diary){ 
+            memory.diary = true; 
+            diary.classList.add("clicked"); 
+            messageLiving.innerHTML = "내가 너에게 처음으로 편지를 썼던 다이어리..."; 
+            updateInventory(); 
+        }
+    };
+
+    album.onclick = () => { 
+        if(!memory.album){ 
+            memory.album = true; 
+            album.classList.add("clicked"); 
+            messageLiving.innerHTML = "함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어."; 
+            updateInventory(); 
+        }
+    };
 </script>
 
 </body>
