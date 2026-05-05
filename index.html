@@ -202,7 +202,10 @@
 
     // 초기화
     window.addEventListener("load", () => {
+        setTimeout(() => {
+        adjustObjectPositions();
         updateInventory();
+    }, 300);   // 0.3초 지연
     });
 
     // 기존 클릭 이벤트
