@@ -88,10 +88,15 @@
     </div>
 
     <!-- 3. LM2.jpg 집 장면 (마지막 장면) -->
+    <!-- 3. LM2.jpg - 바뀐 미래 (경제적으로 힘든 삶) -->
     <div id="scene-living2" class="scene hidden" style="background-image:url('./image/LM2_bg.jpg');">
         <div id="inventory">수집한 기억:<br><div id="items"></div></div>
         <div id="message-living2"></div>
-        <!-- 여기에 다음 오브젝트들 추가 가능 -->
+    
+        <!-- 오브젝트들 -->
+        <div id="graduation-frame" class="object" style="top:38%; left:52%;">졸업증명서</div>
+        <div id="debt-papers" class="object" style="top:65%; left:48%;">고지서들</div>
+        <div id="window" class="object" style="top:42%; left:78%;">창문</div>
     </div>
 
     <!-- 사물함 클로즈업 -->
@@ -212,6 +217,53 @@
     photo.onclick = () => { if(!memory.photo){ memory.photo=true; photo.classList.add("clicked"); messageLiving.innerHTML="우리 결혼식 때 찍은 사진이네...<br>너무 행복했었지."; updateInventory(); }};
     diary.onclick = () => { if(!memory.diary){ memory.diary=true; diary.classList.add("clicked"); messageLiving.innerHTML="내가 너에게 처음으로 편지를 썼던 다이어리..."; updateInventory(); }};
     album.onclick = () => { if(!memory.album){ memory.album=true; album.classList.add("clicked"); messageLiving.innerHTML="함께 여행 다녔던 사진 앨범이야.<br>기억이 하나씩 돌아오고 있어."; updateInventory(); }};
+
+    // ==================== LM2 장면 (씁쓸한 미래) ====================
+    const graduationFrame = document.getElementById("graduation-frame");
+    const debtPapers = document.getElementById("debt-papers");
+    const futureWindow = document.getElementById("window");
+    
+    let checkedObjects = 0;
+    const totalObjects = 2; // 졸업증명서 + 고지서
+    
+    graduationFrame.onclick = () => {
+        messageLiving2.innerHTML = "대학 졸업증명서...<br>액자에 예쁘게 걸려 있지만, 지금은 공허하게만 느껴진다.";
+        checkedObjects++;
+        checkAllObjects();
+    };
+    
+    debtPapers.onclick = () => {
+        messageLiving2.innerHTML = "책상 위에 쌓인 고지서와 독촉장들...<br>졸업하고도 경제적으로 너무 힘들다.";
+        checkedObjects++;
+        checkAllObjects();
+    };
+    
+    function checkAllObjects() {
+        if (checkedObjects >= totalObjects) {
+            setTimeout(() => {
+                messageLiving2.innerHTML = "<strong>내가 원하던 삶은 이런 게 아닌데...</strong><br>미래가 이상하게 바뀌어 버렸어. 이게 아니야!";
+            }, 800);
+        }
+    }
+    
+    // 창문 클릭 → 회사 장면으로 이동
+    futureWindow.onclick = () => {
+        if (checkedObjects >= totalObjects) {
+            messageLiving2.innerHTML = "오른쪽 창문이 유난히 밝게 빛나고 있다...";
+            
+            setTimeout(() => {
+                document.getElementById("scene-living2").classList.add("hidden");
+                
+                // comp_bg 회사 장면으로 이동 (새 장면 추가 필요)
+                // 아직 scene-company가 없다면 아래처럼 만들어야 합니다.
+                alert("창문을 통해 새로운 장면으로 이동합니다... (comp_bg)");
+                // 여기서 comp_bg 장면으로 넘어가도록 나중에 구현
+            }, 1500);
+        } else {
+            messageLiving2.innerHTML = "아직 확인하지 않은 것이 있는 것 같다...";
+        }
+    };
+
 </script>
 </body>
 </html>
