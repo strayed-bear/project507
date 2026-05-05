@@ -129,31 +129,25 @@
     }
 
     function adjustObjectPositions() {
-    const w = room.clientWidth;
-    const h = room.clientHeight;
-
-    // ==================== 첫 번째 거실 장면 (가운데 집중 배치) ====================
-    // 사진
-    photo.style.left = (w * 0.42) + "px";
-    photo.style.top = (h * 0.42) + "px";
-
-    // 다이어리
-    diary.style.left = (w * 0.58) + "px";
-    diary.style.top = (h * 0.55) + "px";
-
-    // 앨범
-    album.style.left = (w * 0.35) + "px";
-    album.style.top = (h * 0.62) + "px";
-
-    // 거울 (오른쪽으로 약간)
-    mirror.style.left = (w * 0.78) + "px";
-    mirror.style.top = (h * 0.48) + "px";
-    mirror.style.width = (w * 0.18) + "px";
-    mirror.style.height = (h * 0.42) + "px";
-
-    // ==================== 교실 장면 (기존 유지) ====================
-    // 필요하면 여기서도 조정 가능
-    }       // 필요 시 위치 조정 로직 추가
+    // 첫 번째 거실 장면 (맨 처음 배경)
+        photo.style.left = "42%";
+        photo.style.top = "42%";
+        photo.style.transform = "translate(-50%, -50%)";
+    
+        diary.style.left = "58%";
+        diary.style.top = "57%";
+        diary.style.transform = "translate(-50%, -50%)";
+    
+        album.style.left = "33%";
+        album.style.top = "65%";
+        album.style.transform = "translate(-50%, -50%)";
+    
+        mirror.style.left = "78%";
+        mirror.style.top = "48%";
+        mirror.style.width = "18%";
+        mirror.style.height = "42%";
+        mirror.style.transform = "translate(-50%, -50%)";
+    }
 
     // 거울 클릭 → 교실
     mirror.onclick = () => {
