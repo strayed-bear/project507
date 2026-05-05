@@ -87,7 +87,6 @@
         <div id="document" class="object" style="top:68%; left:52%;">대학 지원서</div>
     </div>
 
-    <!-- 3. LM2.jpg 집 장면 (마지막 장면) -->
     <!-- 3. LM2.jpg - 바뀐 미래 (경제적으로 힘든 삶) -->
     <div id="scene-living2" class="scene hidden" style="background-image:url('./image/LM2_bg.jpg');">
         <div id="inventory">수집한 기억:<br><div id="items"></div></div>
@@ -107,6 +106,13 @@
             <div id="locker-message"></div>
         </div>
     </div>
+    <!-- 4. 회사 장면 (comp_bg.png) -->
+    <div id="scene-company" class="scene hidden" style="background-image:url('./image/comp_bg.png');">
+        <div id="inventory">수집한 기억:<br><div id="items"></div></div>
+        <div id="message-company"></div>
+        <!-- 회사 장면 오브젝트는 나중에 추가 가능 -->
+    </div>
+    
 </div>
 
 <script>
@@ -222,6 +228,7 @@
     const graduationFrame = document.getElementById("graduation-frame");
     const debtPapers = document.getElementById("debt-papers");
     const futureWindow = document.getElementById("window");
+    const messageCompany = document.getElementById("message-company");
     
     let checkedObjects = 0;
     const totalObjects = 2; // 졸업증명서 + 고지서
@@ -253,11 +260,9 @@
             
             setTimeout(() => {
                 document.getElementById("scene-living2").classList.add("hidden");
-                
-                // comp_bg 회사 장면으로 이동 (새 장면 추가 필요)
-                // 아직 scene-company가 없다면 아래처럼 만들어야 합니다.
-                alert("창문을 통해 새로운 장면으로 이동합니다... (comp_bg)");
-                // 여기서 comp_bg 장면으로 넘어가도록 나중에 구현
+                const companyScene = document.getElementById("scene-company");
+                companyScene.classList.remove("hidden");
+                messageCompany.innerHTML = "회사 책상 앞에 앉아 있다...<br>졸업하고 들어온 회사인데, 매일 야근만 한다.";
             }, 1500);
         } else {
             messageLiving2.innerHTML = "아직 확인하지 않은 것이 있는 것 같다...";
